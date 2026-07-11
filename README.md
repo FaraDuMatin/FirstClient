@@ -4,7 +4,7 @@
 
 A practice environment for new freelancers: complete a full gig — live voice
 briefing, scoping, a real deliverable, a revision call, and a debrief — with a
-realistic AI client, before your first real one.
+realistic client, before your first real one.
 
 Built at cuHacking 2026.
 

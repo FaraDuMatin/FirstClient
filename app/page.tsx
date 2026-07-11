@@ -6,7 +6,7 @@ export default function Home() {
           FirstClient
         </p>
         <h1 className="text-4xl font-semibold tracking-tight text-black sm:text-5xl dark:text-zinc-50">
-          Your first client is an AI.
+          Your first client.
         </h1>
         <p className="max-w-lg text-lg leading-8 text-zinc-600 dark:text-zinc-400">
           Rehearse the job before it counts. A flight simulator for freelancing:

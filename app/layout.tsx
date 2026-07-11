@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FirstClient",
   description:
-    "Your first client is an AI. Rehearse freelancing before it counts.",
+    "Your first client. Rehearse freelancing before it counts.",
 };
 
 export default function RootLayout({
