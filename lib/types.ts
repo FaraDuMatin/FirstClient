@@ -112,6 +112,11 @@ export const ProcessRubricSchema = z.object({
     tone: z.number().int().min(1).max(5),
     revisionHandling: z.number().int().min(1).max(5),
   }),
+  hireAgainSignal: z.enum([
+    "Would hire again",
+    "Would hire with doubts",
+    "Would not return",
+  ]),
   whatWorked: z.array(z.string()),
   gaps: z.array(z.string()),
   priorityFix: z.string().describe("The one concrete change for the next gig"),

@@ -27,6 +27,16 @@ function agentBody() {
         first_message: persona.firstMessageBriefing,
         prompt: {
           prompt: buildBriefingPrompt(persona),
+          // Lets Marcus hang up on his own once the business is concluded.
+          built_in_tools: {
+            end_call: {
+              name: "end_call",
+              description: "",
+              response_timeout_secs: 20,
+              type: "system",
+              params: { system_tool_type: "end_call" },
+            },
+          },
         },
       },
       tts: {

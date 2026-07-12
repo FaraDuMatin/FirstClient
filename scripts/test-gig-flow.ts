@@ -100,7 +100,11 @@ async function main() {
     .toBuffer();
 
   const colorStats = await computeColorStats(bluePng);
-  const analysis = await analyzeSubmission(bluePng.toString("base64"), "image/png", persona, colorStats);
+  const analysis = await analyzeSubmission(
+    { type: "image", data: bluePng.toString("base64"), mime_type: "image/png" },
+    persona,
+    colorStats,
+  );
   const blueJudgment = analysis.hiddenRequirementViolations.find((v) => v.requirementId === "no-blue");
   check("submission analysis flags no-blue violation", blueJudgment?.violated === true, `blueShare=${colorStats.blueShare.toFixed(3)}`);
 

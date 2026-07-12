@@ -8,13 +8,16 @@ import { getPersona } from "@/lib/personas";
 import { analyzeSubmission } from "@/lib/submission/analyze";
 import { computeColorStats } from "@/lib/submission/colors";
 import type { Submission } from "@/lib/types";
+import sharp from "sharp";
 import { z } from "zod";
 
 export const runtime = "nodejs"; // sharp needs Node
 
 const BodySchema = z.object({
-  // e.g. "data:image/png;base64,iVBOR..."
-  imageDataUrl: z.string().regex(/^data:image\/[a-z+]+;base64,/),
+  // Raster images, SVG, or PDF as a data URL.
+  imageDataUrl: z
+    .string()
+    .regex(/^data:(image\/[a-z+.-]+|application\/pdf);base64,/),
 });
 
 export async function POST(
@@ -42,6 +45,9 @@ export async function POST(
   const { imageDataUrl } = parsed.data;
   const mimeType = imageDataUrl.slice(5, imageDataUrl.indexOf(";"));
   const base64 = imageDataUrl.slice(imageDataUrl.indexOf(",") + 1);
+  const buffer = Buffer.from(base64, "base64");
+  const isPdf = mimeType === "application/pdf";
+  const isSvg = mimeType === "image/svg+xml";
 
   const submission: Submission = {
     imageDataUrl,
@@ -49,19 +55,32 @@ export async function POST(
     submittedAt: new Date().toISOString(),
   };
 
-  try {
-    submission.colorStats = await computeColorStats(Buffer.from(base64, "base64"));
-  } catch (e) {
-    return Response.json(
-      { error: `could not decode image: ${e instanceof Error ? e.message : String(e)}` },
-      { status: 400 },
-    );
+  // Pixel color pass — sharp rasterizes SVG natively; PDFs are skipped
+  // (Gemini judges colors alone there).
+  if (!isPdf) {
+    try {
+      submission.colorStats = await computeColorStats(buffer);
+    } catch (e) {
+      return Response.json(
+        { error: `could not decode image: ${e instanceof Error ? e.message : String(e)}` },
+        { status: 400 },
+      );
+    }
   }
 
   if (hasGemini()) {
+    let media: Parameters<typeof analyzeSubmission>[0];
+    if (isPdf) {
+      media = { type: "document", data: base64, mime_type: "application/pdf" };
+    } else if (isSvg) {
+      // Gemini doesn't take SVG — rasterize to PNG for analysis.
+      const png = await sharp(buffer).resize(768, 768, { fit: "inside" }).png().toBuffer();
+      media = { type: "image", data: png.toString("base64"), mime_type: "image/png" };
+    } else {
+      media = { type: "image", data: base64, mime_type: mimeType };
+    }
     submission.analysis = await analyzeSubmission(
-      base64,
-      mimeType,
+      media,
       getPersona(gig.personaId),
       submission.colorStats,
     );

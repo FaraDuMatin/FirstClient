@@ -8,7 +8,8 @@ const TRANSITIONS: Record<GigState, readonly GigState[]> = {
   briefing: ["scoping"],
   scoping: ["working"],
   working: ["revision"],
-  revision: ["delivered"],
+  // "working" re-entry = client asked for changes; the freelancer resubmits.
+  revision: ["working", "delivered"],
   delivered: [],
 };
 

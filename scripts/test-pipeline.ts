@@ -93,8 +93,7 @@ async function main() {
     // 2) Gemini vision analysis
     try {
       const analysis = await analyzeSubmission(
-        png.toString("base64"),
-        "image/png",
+        { type: "image", data: png.toString("base64"), mime_type: "image/png" },
         persona,
         colorStats,
       );

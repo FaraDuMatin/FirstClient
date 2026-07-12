@@ -68,11 +68,19 @@ export async function analyzeSpeech(
   const allTurns = [...briefing, ...revision];
   const metrics = computeSpeechMetrics(allTurns);
 
-  const prompt = `You are a direct, no-praise-padding communication coach reviewing how a freelancer SPOKE on two client calls (a briefing and a revision round). Judge only the freelancer's speech — not their design work.
+  const prompt = `You are a direct, no-praise-padding communication coach reviewing how a freelancer SPOKE on two client calls (a briefing and a revision round). Judge only the freelancer's speech — not their design work. Their single biggest risk is RAMBLING and hedged, filler-padded answers.
 
 ${SPEECH_RUBRIC_TEXT}
 
-CALIBRATION: strong = headline-first answers that stop cleanly; states things once; commits ("I'll have v1 Friday") instead of hedging ("I could maybe try"). Weak = circling back, filler padding, trailing off, over-explaining. A polite but rambling speaker should still score 2 on concision. Notes: 1-3 short bullets, each quoting or closely paraphrasing a real moment from the transcript.
+CALIBRATION — hard caps, use the deterministic metrics below as evidence, do not recompute them:
+- fillerPerHundredWords > 5 caps concision at 3; > 10 caps it at 2.
+- avgWordsPerTurn > 60 with circular or repeated content caps concision at 2 and pushes rambleScore to 4+.
+- confidence: hedging in commitments ("maybe", "I could try", "sort of", trailing off) caps confidence at 3. Direct commitments with dates ("I'll send v2 tomorrow at 9") = 4-5.
+- A strong turn leads with the headline, states it once, and stops. A polite but rambling speaker still scores 2 on concision — pleasant is not concise.
+- rambleScore: 5 = meandering, circular, filler-padded across multiple turns; 1 = tight, headline-first, clean stops.
+
+notes: 1-3 short bullets. Each MUST contain a short VERBATIM quote from the transcript in double quotes ("...") showing the habit in action.
+priorityFix: ONE concrete speech habit to change on the next call. One sentence, no hedging.
 
 Deterministic metrics (already computed in code — do not recompute, use as evidence):
 ${JSON.stringify(metrics, null, 2)}

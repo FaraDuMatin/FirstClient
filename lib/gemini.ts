@@ -25,7 +25,8 @@ function client(): GoogleGenAI {
 
 export type GeminiPart =
   | { type: "text"; text: string }
-  | { type: "image"; data: string; mime_type: string };
+  | { type: "image"; data: string; mime_type: string }
+  | { type: "document"; data: string; mime_type: string };
 
 export async function generateStructured<S extends z.ZodType>(
   schema: S,
