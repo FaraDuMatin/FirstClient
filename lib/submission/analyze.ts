@@ -23,9 +23,10 @@ export async function analyzeSubmission(
   const colorSection = colorStats
     ? `Deterministic pixel data (computed in code, trust it over your own color impression):
 - blueShare (fraction of opaque pixels in the blue hue range): ${colorStats.blueShare.toFixed(3)}
+- redShare (fraction in the red hue range): ${(colorStats.redShare ?? 0).toFixed(3)}
 - dominant colors: ${colorStats.dominantColors.map((c) => `${c.hex} (${(c.share * 100).toFixed(0)}%)`).join(", ")}
 
-For the "no-blue" style requirements: violated = true whenever blueShare > 0.05.`
+For color requirements: a "no blue" requirement is violated whenever blueShare > 0.05; a "no red" requirement is violated whenever redShare > 0.05.`
     : `No pixel data is available for this file type. Judge the colors yourself and be strict: ANY shade of blue — navy, royal, cyan, blue-leaning teal — counts as blue for a "no blue" requirement.`;
 
   const prompt = `You are analyzing a logo submitted by a freelancer for the client "${persona.business}".

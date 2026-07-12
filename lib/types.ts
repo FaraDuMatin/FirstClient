@@ -61,6 +61,8 @@ export type ConversationRecord = z.infer<typeof ConversationRecordSchema>;
 export const ColorStatsSchema = z.object({
   dominantColors: z.array(z.object({ hex: z.string(), share: z.number() })),
   blueShare: z.number(),
+  // optional: gigs analyzed before red detection existed lack it
+  redShare: z.number().optional(),
 });
 export type ColorStats = z.infer<typeof ColorStatsSchema>;
 

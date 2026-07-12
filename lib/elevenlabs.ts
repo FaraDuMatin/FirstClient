@@ -5,8 +5,8 @@ import { z } from "zod";
 
 const BASE = "https://api.elevenlabs.io";
 
-export function hasElevenLabs(): boolean {
-  return Boolean(process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_AGENT_ID);
+export function hasElevenLabs(agentEnvKey = "ELEVENLABS_AGENT_ID"): boolean {
+  return Boolean(process.env.ELEVENLABS_API_KEY && process.env[agentEnvKey]);
 }
 
 function headers(): Record<string, string> {
@@ -16,9 +16,11 @@ function headers(): Record<string, string> {
 }
 
 // WebRTC conversation token for the browser SDK (@elevenlabs/react).
-export async function getConversationToken(): Promise<string> {
-  const agentId = process.env.ELEVENLABS_AGENT_ID;
-  if (!agentId) throw new Error("ELEVENLABS_AGENT_ID is not set");
+export async function getConversationToken(
+  agentEnvKey = "ELEVENLABS_AGENT_ID",
+): Promise<string> {
+  const agentId = process.env[agentEnvKey];
+  if (!agentId) throw new Error(`${agentEnvKey} is not set`);
   const res = await fetch(
     `${BASE}/v1/convai/conversation/token?agent_id=${encodeURIComponent(agentId)}`,
     { headers: headers(), cache: "no-store" },

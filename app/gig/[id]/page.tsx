@@ -101,6 +101,13 @@ export default async function GigTranscriptPage({
           </article>
         )}
 
+        {gig.scope && (
+          <article className={paper}>
+            <h2 className={paperTitle}>AGREED SCOPE</h2>
+            <p className="mt-3 text-xl leading-6">{gig.scope}</p>
+          </article>
+        )}
+
         <article className={paper}>
           <h2 className={paperTitle}>TIMELINE</h2>
           <ul className="mt-3 space-y-1 text-xl leading-6">

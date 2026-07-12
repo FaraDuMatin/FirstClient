@@ -5,7 +5,7 @@
 import { getGig } from "@/lib/db";
 import { getConversationToken, hasElevenLabs } from "@/lib/elevenlabs";
 import { buildBriefingPrompt, buildRevisionPrompt } from "@/lib/agent/prompt";
-import { getPersona } from "@/lib/personas";
+import { agentEnvKeyForPersona, getPersona } from "@/lib/personas";
 
 export async function GET(
   req: Request,
@@ -16,17 +16,17 @@ export async function GET(
   if (stage !== "briefing" && stage !== "revision") {
     return Response.json({ error: "stage must be 'briefing' or 'revision'" }, { status: 400 });
   }
-  if (!hasElevenLabs()) {
-    return Response.json(
-      { error: "ELEVENLABS_API_KEY / ELEVENLABS_AGENT_ID not configured" },
-      { status: 503 },
-    );
-  }
-
   const gig = await getGig(id);
   if (!gig) return Response.json({ error: "gig not found" }, { status: 404 });
 
   const persona = getPersona(gig.personaId);
+  const agentEnvKey = agentEnvKeyForPersona(gig.personaId);
+  if (!hasElevenLabs(agentEnvKey)) {
+    return Response.json(
+      { error: `ELEVENLABS_API_KEY / ${agentEnvKey} not configured` },
+      { status: 503 },
+    );
+  }
   let prompt: string;
   let firstMessage: string;
   if (stage === "briefing") {
@@ -39,10 +39,10 @@ export async function GET(
         { status: 409 },
       );
     }
-    prompt = buildRevisionPrompt(persona, gig.submission);
+    prompt = buildRevisionPrompt(persona, gig.submission, gig.scope);
     firstMessage = persona.firstMessageRevision;
   }
 
-  const token = await getConversationToken();
+  const token = await getConversationToken(agentEnvKey);
   return Response.json({ token, prompt, firstMessage });
 }

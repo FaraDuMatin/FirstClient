@@ -4,10 +4,12 @@
 import sharp from "sharp";
 import type { ColorStats } from "@/lib/types";
 
-// Hue window (degrees) treated as "blue", with saturation/value floors so
-// near-gray and near-black pixels don't count.
+// Hue windows (degrees) with saturation/value floors so near-gray and
+// near-black pixels don't count. Blue trap: persona v1. Red trap: persona v2.
 const BLUE_HUE_MIN = 190;
 const BLUE_HUE_MAX = 265;
+const RED_HUE_MAX = 15; // red wraps around 0: h <= 15 or h >= 345
+const RED_HUE_MIN = 345;
 const MIN_SATURATION = 0.2;
 const MIN_VALUE = 0.15;
 
@@ -39,6 +41,7 @@ export async function computeColorStats(image: Buffer): Promise<ColorStats> {
   const bins = new Map<string, number>();
   let opaquePixels = 0;
   let bluePixels = 0;
+  let redPixels = 0;
 
   for (let i = 0; i < info.width * info.height; i++) {
     const r = data[i * 4];
@@ -49,8 +52,9 @@ export async function computeColorStats(image: Buffer): Promise<ColorStats> {
     opaquePixels++;
 
     const [h, s, v] = rgbToHsv(r, g, b);
-    if (h >= BLUE_HUE_MIN && h <= BLUE_HUE_MAX && s >= MIN_SATURATION && v >= MIN_VALUE) {
-      bluePixels++;
+    if (s >= MIN_SATURATION && v >= MIN_VALUE) {
+      if (h >= BLUE_HUE_MIN && h <= BLUE_HUE_MAX) bluePixels++;
+      if (h <= RED_HUE_MAX || h >= RED_HUE_MIN) redPixels++;
     }
 
     // Quantize to 8 levels per channel (512 bins) for dominant-color counting.
@@ -71,5 +75,9 @@ export async function computeColorStats(image: Buffer): Promise<ColorStats> {
       return { hex: `#${hex}`, share: count / total };
     });
 
-  return { dominantColors, blueShare: bluePixels / total };
+  return {
+    dominantColors,
+    blueShare: bluePixels / total,
+    redShare: redPixels / total,
+  };
 }

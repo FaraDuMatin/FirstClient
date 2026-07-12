@@ -1,11 +1,12 @@
-// Creates (or updates) the "Marcus Webb" ElevenLabs agent entirely by API —
-// no dashboard clicking. Critically, it enables per-session overrides for
+// Creates (or updates) a persona's ElevenLabs agent entirely by API — no
+// dashboard clicking. Critically, it enables per-session overrides for
 // prompt + first_message, which the revision-call mechanic depends on.
-// Run: npm run setup:agent
+// Run: npm run setup:agent            (Marcus, ELEVENLABS_AGENT_ID)
+//      npm run setup:agent -- logo-client-v2   (Priya, ELEVENLABS_AGENT_ID_2)
 
 import { buildBriefingPrompt } from "../lib/agent/prompt";
 import { getConversationToken } from "../lib/elevenlabs";
-import { getPersona, DEFAULT_PERSONA_ID } from "../lib/personas";
+import { agentEnvKeyForPersona, getPersona, DEFAULT_PERSONA_ID } from "../lib/personas";
 
 try {
   process.loadEnvFile(".env.local");
@@ -14,13 +15,16 @@ try {
 }
 
 const BASE = "https://api.elevenlabs.io";
-// Premade ElevenLabs voice "George" — warm, middle-aged male. Swap freely.
-const VOICE_ID = "JBFqnCBsd6RMkjVDRZzb";
+const PERSONA_ID = process.argv[2] ?? DEFAULT_PERSONA_ID;
+const AGENT_ENV_KEY = agentEnvKeyForPersona(PERSONA_ID);
+// Premade ElevenLabs voices: George (warm middle-aged male) for Marcus,
+// Jessica (crisp adult female) for Priya. Swap freely.
+const VOICE_ID = PERSONA_ID === "logo-client-v2" ? "cgSgspJ2msm6clMCkdW9" : "JBFqnCBsd6RMkjVDRZzb";
 
 function agentBody() {
-  const persona = getPersona(DEFAULT_PERSONA_ID);
+  const persona = getPersona(PERSONA_ID);
   return {
-    name: "FirstClient — Marcus Webb (logo client)",
+    name: `FirstClient — ${persona.name} (${persona.business})`,
     conversation_config: {
       agent: {
         language: "en",
@@ -64,7 +68,8 @@ async function main() {
     return;
   }
   const headers = { "xi-api-key": key, "Content-Type": "application/json" };
-  const existingId = process.env.ELEVENLABS_AGENT_ID;
+  console.log(`[..] persona: ${PERSONA_ID} -> env ${AGENT_ENV_KEY}`);
+  const existingId = process.env[AGENT_ENV_KEY];
 
   let agentId: string;
   if (existingId) {
@@ -99,13 +104,13 @@ async function main() {
     }
     agentId = body.agent_id;
     console.log(`[OK] agent created: ${agentId}`);
-    console.log(`\n>>> add this line to .env.local:\nELEVENLABS_AGENT_ID=${agentId}\n`);
+    console.log(`\n>>> add this line to .env.local (and Vercel env):\n${AGENT_ENV_KEY}=${agentId}\n`);
   }
 
   // Token round trip proves the browser voice path is ready.
-  process.env.ELEVENLABS_AGENT_ID = agentId;
+  process.env[AGENT_ENV_KEY] = agentId;
   try {
-    const token = await getConversationToken();
+    const token = await getConversationToken(AGENT_ENV_KEY);
     console.log(`[OK] WebRTC conversation token minted (${token.slice(0, 12)}...)`);
   } catch (e) {
     console.log(`[FAIL] token round trip: ${e instanceof Error ? e.message.slice(0, 300) : e}`);

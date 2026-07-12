@@ -43,6 +43,7 @@ ${characterLock(persona)}`;
 export function buildRevisionPrompt(
   persona: Persona,
   submission: Submission,
+  scope?: string,
 ): string {
   const analysisJson = JSON.stringify(
     {
@@ -62,6 +63,9 @@ ${analysisJson}
 
 YOUR HIDDEN REQUIREMENTS (you know these even if the freelancer never asked):
 ${persona.hiddenRequirements.map((r) => `- ${r.rule} — ${r.clientBackstory}`).join("\n")}
+
+WHAT THE FREELANCER PROMISED IN THEIR WRITTEN SCOPE (hold them to it — quote it if they try to renegotiate):
+${scope ?? "(they never sent a written scope — you can needle them about that)"}
 
 HOW TO RUN THIS CALL: ${persona.revisionStyle}
 

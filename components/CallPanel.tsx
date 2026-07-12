@@ -6,13 +6,14 @@
 // SDK v1 requires a ConversationProvider around the hook.
 
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Stage = "briefing" | "revision";
 
 type CallPanelProps = {
   gigId: string;
   stage: Stage;
+  clientShortName?: string;
   onCallEnded: () => void;
 };
 
@@ -31,11 +32,19 @@ export function CallPanel(props: CallPanelProps) {
   );
 }
 
-function CallPanelInner({ gigId, stage, onCallEnded }: CallPanelProps) {
+function CallPanelInner({ gigId, stage, clientShortName = "CLIENT", onCallEnded }: CallPanelProps) {
   const [phase, setPhase] = useState<"idle" | "connecting" | "live" | "saving">("idle");
   const [error, setError] = useState<string | null>(null);
   const conversationIdRef = useRef<string | null>(null);
   const savingRef = useRef(false);
+  const ringtoneRef = useRef<HTMLAudioElement | null>(null);
+
+  function stopRingtone() {
+    ringtoneRef.current?.pause();
+    ringtoneRef.current = null;
+  }
+  // Kill the ringtone if the component unmounts mid-connect.
+  useEffect(() => stopRingtone, []);
 
   async function finishCall() {
     if (savingRef.current) return;
@@ -62,14 +71,17 @@ function CallPanelInner({ gigId, stage, onCallEnded }: CallPanelProps) {
 
   const conversation = useConversation({
     onConnect: ({ conversationId }: { conversationId: string }) => {
+      stopRingtone();
       conversationIdRef.current = conversationId;
       setPhase("live");
     },
     onError: (message: string) => {
+      stopRingtone();
       setError(message);
       setPhase("idle");
     },
     onDisconnect: () => {
+      stopRingtone();
       void finishCall();
     },
   });
@@ -77,6 +89,10 @@ function CallPanelInner({ gigId, stage, onCallEnded }: CallPanelProps) {
   async function start() {
     setError(null);
     setPhase("connecting");
+    const ring = new Audio("/ringtone.mp3");
+    ring.loop = true;
+    ringtoneRef.current = ring;
+    void ring.play().catch(() => {});
     try {
       const res = await fetch(`/api/gigs/${gigId}/call?stage=${stage}`);
       const cfg = (await res.json()) as CallConfig;
@@ -93,9 +109,15 @@ function CallPanelInner({ gigId, stage, onCallEnded }: CallPanelProps) {
         },
       });
     } catch (e) {
+      stopRingtone();
       setError(e instanceof Error ? e.message : String(e));
       setPhase("idle");
     }
+  }
+
+  function hangUp() {
+    void new Audio("/hangup.mp3").play().catch(() => {});
+    conversation.endSession();
   }
 
   const button =
@@ -114,11 +136,11 @@ function CallPanelInner({ gigId, stage, onCallEnded }: CallPanelProps) {
       {phase === "live" && (
         <>
           <p className="text-xl tracking-widest text-[#7c8a6e]">
-            {conversation.isSpeaking ? "● MARCUS IS TALKING" : "○ YOUR TURN — SPEAK"}
+            {conversation.isSpeaking ? `● ${clientShortName} IS TALKING` : "○ YOUR TURN — SPEAK"}
           </p>
           <button
             type="button"
-            onClick={() => conversation.endSession()}
+            onClick={hangUp}
             className={`${button} bg-[#6e2b2b] text-[#e8d9c0]`}
           >
             HANG UP
