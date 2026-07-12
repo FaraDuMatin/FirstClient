@@ -438,7 +438,7 @@ export default function Practice() {
             </p>
 
             <p className="mt-3 font-[family-name:var(--font-pixel-heading)] text-[9px] tracking-widest text-[#4a5a6e]">
-              WHAT WORKED
+              THE GOOD
             </p>
             <ul className="mt-1 space-y-1 text-lg leading-5">
               {scorecard.process.whatWorked.map((w, i) => (
@@ -447,7 +447,7 @@ export default function Practice() {
             </ul>
 
             <p className="mt-3 font-[family-name:var(--font-pixel-heading)] text-[9px] tracking-widest text-[#6e2b2b]">
-              WHAT DIDN&apos;T
+              THE BAD
             </p>
             <ul className="mt-1 space-y-1 text-lg leading-5">
               {scorecard.process.gaps.map((g, i) => (
