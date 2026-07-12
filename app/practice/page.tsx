@@ -27,6 +27,7 @@ const MARCUS: BoothConfig = {
     deadline: "Fast",
   },
   portrait: { skin: "#7c8a6e", hair: "#3a3028", sweater: "#6e2b2b" },
+  nextRound: { href: "/practice2", label: "TRY A HARDER CLIENT →" },
 };
 
 export default function Practice() {

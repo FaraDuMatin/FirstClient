@@ -1,13 +1,13 @@
-// /practice2 — Priya Shah, the harder v2 client (unlinked; go here manually).
+// /practice2 — Sarah Shah, the harder v2 client (unlinked; go here manually).
 // Needs ELEVENLABS_AGENT_ID_2 in env. Traps: no red, exact "Juniper & Thorn"
 // wordmark, and she WILL try to scope-creep a free extra on the revision call.
 
 import { PracticeBooth, type BoothConfig } from "@/components/PracticeBooth";
 
-const PRIYA: BoothConfig = {
+const SARAH: BoothConfig = {
   personaId: "logo-client-v2",
-  clientName: "PRIYA SHAH",
-  clientShortName: "PRIYA",
+  clientName: "SARAH SHAH",
+  clientShortName: "SARAH",
   idleBubble:
     "Round two. This client is faster, sharper, and will test your scope. Clock in.",
   reviseBubble:
@@ -22,7 +22,7 @@ const PRIYA: BoothConfig = {
     delivered: "Done. Read your debrief — I said what I said.",
   },
   brief: {
-    client: "Priya Shah",
+    client: "Sarah Shah",
     business: "Juniper & Thorn",
     job: "Logo rebrand",
     budget: "Decent",
@@ -32,5 +32,5 @@ const PRIYA: BoothConfig = {
 };
 
 export default function Practice2() {
-  return <PracticeBooth config={PRIYA} />;
+  return <PracticeBooth config={SARAH} />;
 }

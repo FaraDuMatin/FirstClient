@@ -31,6 +31,8 @@ export type BoothConfig = {
   bubbles: Record<Gig["state"], string>;
   brief: { client: string; business: string; job: string; budget: string; deadline: string };
   portrait: { skin: string; hair: string; sweater: string };
+  // optional: link to another persona's booth, shown under the gig brief card
+  nextRound?: { href: string; label: string };
 };
 
 export const GIG_IDS_KEY = "fc.gigIds";
@@ -322,6 +324,14 @@ export function PracticeBooth({ config }: { config: BoothConfig }) {
             &ldquo;Ask questions on the call. What you don&rsquo;t ask will come back to bite you.&rdquo;
           </p>
           <p className="mt-3 text-right text-sm tracking-widest text-[#8a7f60]">{gig?.id ?? "----"}</p>
+          {config.nextRound && (
+            <Link
+              href={config.nextRound.href}
+              className="mt-3 block border-t-2 border-dashed border-[#8a7f60] pt-2 text-center text-lg tracking-widest text-[#4a5a6e] underline"
+            >
+              {config.nextRound.label}
+            </Link>
+          )}
         </article>
 
         {/* scope pad — scoping stage */}

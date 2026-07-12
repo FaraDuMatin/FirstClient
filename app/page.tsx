@@ -4,6 +4,7 @@
 import { Press_Start_2P, VT323 } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import { ShaderBackground } from "@/components/ShaderBackground";
 
 const pixelHeading = Press_Start_2P({
   weight: "400",
@@ -51,15 +52,8 @@ export default function Home() {
     >
       {/* ---- Hero ---- */}
       <section className="relative flex flex-col items-center gap-6 overflow-hidden px-6 pb-16 pt-20 text-center">
-        {/* background shader (Shadertoy embed) — decorative only */}
-        <iframe
-          src="https://www.shadertoy.com/embed/NcdGD8?gui=false&paused=false&muted=true"
-          title="background shader"
-          allow="autoplay"
-          tabIndex={-1}
-          aria-hidden
-          className="pointer-events-none absolute inset-0 h-full w-full border-0 opacity-25"
-        />
+        {/* background shader — native WebGL port of shadertoy.com/view/NcdGD8 */}
+        <ShaderBackground />
         <div
           className="pointer-events-none absolute inset-0 opacity-15"
           style={{
