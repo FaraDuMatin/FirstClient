@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check": "tsx scripts/check-env.ts",
+    "test:pipeline": "tsx scripts/test-pipeline.ts",
+    "setup:agent": "tsx scripts/setup-agent.ts",
+    "test:flow": "tsx scripts/test-gig-flow.ts"
   },
   "dependencies": {
     "@elevenlabs/react": "^1.10.0",
